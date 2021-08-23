@@ -1,5 +1,5 @@
 class Cliente:
-    def __init__(self, nome,email,cep,senha,cpf,cidade,estado,endereco):
+    def __init__(self, nome,email,cep,senha,cpf,cidade,estado,endereco,data_nascimento):
         self.nome = nome
         self.email = email
         self.cep = cep
@@ -8,6 +8,7 @@ class Cliente:
         self.cidade = cidade
         self.estado = estado
         self.endereco = endereco
+        self.data_nascimento = data_nascimento
 
 class Prestador:
     def __init__(self, nome,email,cep,senha,cpf,cnpj,telefone,razao_social,cidade,estado,endereco):

@@ -2,7 +2,36 @@ from flask import Flask, request
 import db
 import json
 from models import Cliente
+from flask_cors import CORS, cross_origin
+
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+
+@app.route("/login", methods=['POST'])
+@cross_origin()
+def login():
+    try:
+        data = request.get_json()
+        result = db.login(data['email'],data['password'])
+        r = None
+        if result is None:
+            r = {
+                'client':None,
+                'error':True,
+                'message':'Usuário ou senha incorretos!'
+            }
+        else:
+            r = {
+                'client':json.dumps(result.__dict__),
+                'error':False,
+                'message':'Login realizado com sucesso!'
+            }
+        return r
+    except(Exception) as error:
+        print("Ocorreu um erro ao realizar o login: {error}".format(error=error))
+        return "Erro ao realizar login!"
+    
 
 @app.route("/clientes/get")
 def get_cliente():
@@ -17,7 +46,7 @@ def get_cliente():
 def insert_cliente():
     try:
         data = request.get_json()
-        cliente = Cliente(data['nome'],data['email'],data['cep'],data['senha'],data['cpf'],data['cidade'],data['estado'],data['endereco'])
+        cliente = Cliente(data['name'],data['email'],None,data['password'],data['cpf'],None,None,None,data['dataNascimento'])
         db.insert_cliente(cliente)
     except(Exception) as error:
         print("Um erro ocorreu ao inserir o cliente: {error}".format(error=error))
@@ -53,15 +82,6 @@ def delete_prestadores():
     return "<p>Delete Service Provider!</p>"
 
 
-@app.route("/login", methods=['POST'])
-def login():
-    try:
-        data = request.get_json()
-        print(data)
-    except(Exception) as error:
-        print("Um erro ocorreu ao inserir o cliente: {error}".format(error=error))
-        return "Erro ao inserir"
-    return "Cliente inserido"
 
 
 

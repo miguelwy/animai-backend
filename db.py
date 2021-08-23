@@ -16,6 +16,17 @@ def get_connection() -> MySQLConnection:
         raise Exception("Error during connection to db!")
     return mydb
 
+def login(email,password):
+    mydb = get_connection()
+    print("Connected to db!")
+    cursor = mydb.cursor()
+    cursor.execute("SELECT * FROM cliente WHERE email='{email}' AND senha='{password}'".format(email=email, password=password))
+    result = cursor.fetchone()
+    cliente = None
+    if result is not None:
+        cliente =  Cliente(result[0],result[1],result[2],result[3],result[4],result[5],result[6],result[7],result[8])
+    return cliente
+
 def get_clientes():
     """ Retorna todos os clientes cadastrados no banco """
     clientes_list = []
@@ -27,7 +38,7 @@ def get_clientes():
         result = cursor.fetchall()
         print("Users retrieved!")
         for x in result:
-            c =  Cliente(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7])
+            c =  Cliente(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8])
             clientes_list.append(c)
     except(Exception) as error:
         raise Exception("Error getting clientes list")
@@ -39,8 +50,8 @@ def insert_cliente(cliente:Cliente):
         mydb = get_connection()
         print("Connected to db!")
         cursor = mydb.cursor()
-        values = [cliente.nome, cliente.email, cliente.cep, cliente.senha, cliente.cpf, cliente.cidade, cliente.estado, cliente.endereco]
-        cursor.execute("INSERT INTO cliente(nome,email,cep,senha,cpf,cidade,estado,endereco) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)", values)
+        values = [cliente.nome, cliente.email, cliente.cep, cliente.senha, cliente.cpf, cliente.cidade, cliente.estado, cliente.endereco, cliente.data_nascimento]
+        cursor.execute("INSERT INTO cliente(nome,email,cep,senha,cpf,cidade,estado,endereco, data_nascimento) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)", values)
         mydb.commit()
         print("Cliente inserido!")
     except(Exception) as error:
@@ -58,3 +69,4 @@ def get_prestadores():
         p =  Prestador(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7])
         prestadores_list.append(p)
     return result
+
