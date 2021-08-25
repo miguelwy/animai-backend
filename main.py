@@ -1,7 +1,7 @@
 from flask import Flask, request
 import db
 import json
-from models import Cliente
+from models import Cliente, Prestador
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
@@ -31,6 +31,30 @@ def login():
     except(Exception) as error:
         print("Ocorreu um erro ao realizar o login: {error}".format(error=error))
         return "Erro ao realizar login!"
+
+@app.route("/clientes/insert", methods=['POST'])
+@cross_origin()
+def insert_cliente():
+    try:
+        data = request.get_json()
+        cliente = Cliente(None, data['name'],data['email'],None,data['password'],data['cpf'],None,None,None,data['dataNascimento'])
+        db.insert_cliente(cliente)
+    except(Exception) as error:
+        print("Um erro ocorreu ao inserir o cliente: {error}".format(error=error))
+        return "Erro ao inserir"
+    return "Cliente inserido"
+
+@app.route("/prestadores/insert", methods=['POST'])
+@cross_origin()
+def insert_prestadores():
+    try:
+        data = request.get_json()
+        prestador = Prestador(None,data['name'],data['email'],None,data['password'],data['documento'],data['documentType'],None,None,None,None,None,data['dataNascimento'])
+        db.insert_prestador(prestador)
+    except(Exception) as error:
+        print("Um erro ocorreu ao inserir o prestador: {error}".format(error=error))
+        return "Erro ao inserir prestador"
+    return "Prestador inserido"
     
 
 @app.route("/clientes/get")
@@ -42,16 +66,7 @@ def get_cliente():
         print("Error {error}".format(error= error))
     return json.dumps(clientes)
 
-@app.route("/clientes/insert", methods=['POST'])
-def insert_cliente():
-    try:
-        data = request.get_json()
-        cliente = Cliente(data['name'],data['email'],None,data['password'],data['cpf'],None,None,None,data['dataNascimento'])
-        db.insert_cliente(cliente)
-    except(Exception) as error:
-        print("Um erro ocorreu ao inserir o cliente: {error}".format(error=error))
-        return "Erro ao inserir"
-    return "Cliente inserido"
+
 
 @app.route("/clientes/delete")
 def delete_cliente():
@@ -66,16 +81,7 @@ def get_prestadores():
         print("Error {error}".format(error= error))
     return str(clientes)
 
-@app.route("/prestadores/insert")
-def insert_prestadores():
-    try:
-        data = request.get_json()
-        cliente = Cliente(data['nome'],data['email'],data['cep'],data['senha'],data['cpf'],data['cidade'],data['estado'],data['endereco'])
-        db.insert_cliente(cliente)
-    except(Exception) as error:
-        print("Um erro ocorreu ao inserir o prestador: {error}".format(error=error))
-        return "Erro ao inserir prestador"
-    return "Prestador inserido"
+
 
 @app.route("/prestadores/delete")
 def delete_prestadores():

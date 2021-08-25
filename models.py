@@ -1,5 +1,6 @@
 class Cliente:
-    def __init__(self, nome,email,cep,senha,cpf,cidade,estado,endereco,data_nascimento):
+    def __init__(self, id_cliente, nome,email,cep,senha,cpf,cidade,estado,endereco,data_nascimento):
+        self.id = id_cliente
         self.nome = nome
         self.email = email
         self.cep = cep
@@ -11,18 +12,23 @@ class Cliente:
         self.data_nascimento = data_nascimento
 
 class Prestador:
-    def __init__(self, nome,email,cep,senha,cpf,cnpj,telefone,razao_social,cidade,estado,endereco):
+    def __init__(self, id_prestador,nome,email,cep,senha,documento, tipo_documento,telefone,razao_social,cidade,estado,endereco, data_nascimento):
+        self.id_prestador = id_prestador
         self.nome = nome
         self.email = email
         self.cep = cep
         self.senha = senha
-        self.cpf = cpf
-        self.cnpj = cnpj
+        self.documento = documento
+        if tipo_documento == 'cpf':
+            self.tipo_documento = 1
+        else:
+            self.tipo_documento = 2
         self.telefone = telefone
         self.razao_social = razao_social
         self.cidade = cidade
         self.estado = estado
         self.endereco = endereco
+        self.data_nascimento = data_nascimento
 
 class Proposta:
     def __init__(self,id_proposta,data_proposta,cep,cidade,estado,endereco,horario_inicio,horario_fim,observacoes,data_criacao,valor,id_cliente, id_prestador):
