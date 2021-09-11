@@ -2,6 +2,7 @@ from logging import NullHandler
 import mysql.connector
 from mysql.connector.connection import MySQLConnection
 from models import Cliente,Prestador
+from datetime import datetime
 
 def get_connection() -> MySQLConnection:
     mydb = None 
@@ -24,7 +25,7 @@ def login(email,password):
     result = cursor.fetchone()
     cliente = None
     if result is not None:
-        cliente =  Cliente(result[0],result[1],result[2],result[3],result[4],result[5],result[6],result[7],result[8],str(result[9]))
+        cliente =  Cliente(result[0],result[1],result[2],result[3],result[4],result[5],result[6],result[7],result[8],str(result[9]), result[10])
     return cliente
 
 def get_clientes():
@@ -50,8 +51,8 @@ def insert_cliente(cliente:Cliente):
         mydb = get_connection()
         print("Connected to db!")
         cursor = mydb.cursor()
-        values = [cliente.nome, cliente.email, cliente.cep, cliente.senha, cliente.cpf, cliente.cidade, cliente.estado, cliente.endereco, cliente.data_nascimento]
-        cursor.execute("INSERT INTO cliente(nome,email,cep,senha,cpf,cidade,estado,endereco, data_nascimento) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)", values)
+        values = [cliente.nome, cliente.email, cliente.cep, cliente.senha, cliente.cpf, cliente.cidade, cliente.estado, cliente.endereco, cliente.data_nascimento,cliente.telefone]
+        cursor.execute("INSERT INTO cliente(nome,email,cep,senha,cpf,cidade,estado,endereco, data_nascimento,telefone) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", values)
         mydb.commit()
         print("Cliente inserido!")
     except(Exception) as error:
@@ -63,8 +64,8 @@ def insert_prestador(prestador:Prestador):
         mydb = get_connection()
         print("Connected to db!")
         cursor = mydb.cursor()
-        values = [prestador.nome, prestador.email, prestador.cep, prestador.senha, prestador.documento, prestador.tipo_documento, prestador.cidade, prestador.estado, prestador.endereco, prestador.data_nascimento]
-        cursor.execute("INSERT INTO prestador(nome,email,cep,senha,documento, tipo_documento,cidade,estado,endereco, data_nascimento) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", values)
+        values = [prestador.nome, prestador.email, prestador.cep, prestador.senha, prestador.documento, prestador.tipo_documento, prestador.cidade, prestador.estado, prestador.endereco, prestador.data_nascimento, prestador.telefone]
+        cursor.execute("INSERT INTO prestador(nome,email,cep,senha,documento, tipo_documento,cidade,estado,endereco, data_nascimento, telefone) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", values)
         mydb.commit()
         print("Prestador inserido!")
     except(Exception) as error:
@@ -75,11 +76,15 @@ def get_prestadores():
     mydb = get_connection()
     print("Connected to db!")
     cursor = mydb.cursor()
-    cursor.execute("SELECT * FROM cliente")
+    cursor.execute("SELECT id_prestador,nome,email,cep,senha,telefone,razao_social,cidade,estado,endereco,documento,tipo_documento,DATE_FORMAT(data_nascimento, '%Y-%m-%d'), imagem_perfil,descricao,apresentacao FROM prestador")
     result = cursor.fetchall()
     print("Users retrieved!")
     for x in result:
-        p =  Prestador(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7])
+        p =  Prestador(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10],x[11],x[12],x[13],x[14],x[15])
+        
+        cursor.execute('SELECT id_tipo_prestador FROM assoc_prestador_tipo_prestador a join tipo_prestador t on a.id_tipo_prestador = t.idtipo_prestador where a.id_prestador = {id_prestador}'.format(id_prestador=p.id_prestador))
+        result2 = cursor.fetchall()
+        p.tipos_prestador = result2
         prestadores_list.append(p)
-    return result
+    return prestadores_list
 

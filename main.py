@@ -37,7 +37,7 @@ def login():
 def insert_cliente():
     try:
         data = request.get_json()
-        cliente = Cliente(None, data['name'],data['email'],None,data['password'],data['cpf'],None,None,None,data['dataNascimento'])
+        cliente = Cliente(None, data['name'],data['email'],None,data['password'],data['cpf'],None,None,None,data['dataNascimento'],data['phone'])
         db.insert_cliente(cliente)
     except(Exception) as error:
         print("Um erro ocorreu ao inserir o cliente: {error}".format(error=error))
@@ -49,7 +49,7 @@ def insert_cliente():
 def insert_prestadores():
     try:
         data = request.get_json()
-        prestador = Prestador(None,data['name'],data['email'],None,data['password'],data['documento'],data['documentType'],None,None,None,None,None,data['dataNascimento'])
+        prestador = Prestador(None,data['name'],data['email'],None,data['password'],data['documento'],data['documentType'],data['phone'],None,None,None,None,data['dataNascimento'])
         db.insert_prestador(prestador)
     except(Exception) as error:
         print("Um erro ocorreu ao inserir o prestador: {error}".format(error=error))
@@ -76,10 +76,10 @@ def delete_cliente():
 def get_prestadores():
     prestadores = None
     try:
-        clientes = db.get_clientes()
+        prestadores = db.get_prestadores()
     except(Exception) as error:
         print("Error {error}".format(error= error))
-    return str(clientes)
+    return str(json.dumps([ob.__dict__ for ob in prestadores]))
 
 
 
