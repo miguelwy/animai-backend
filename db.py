@@ -1,7 +1,7 @@
 from logging import NullHandler
 import mysql.connector
 from mysql.connector.connection import MySQLConnection
-from models import Cliente,Prestador
+from models import Cliente,Prestador, TipoPrestador
 from datetime import datetime
 
 def get_connection() -> MySQLConnection:
@@ -76,15 +76,30 @@ def get_prestadores():
     mydb = get_connection()
     print("Connected to db!")
     cursor = mydb.cursor()
-    cursor.execute("SELECT id_prestador,nome,email,cep,senha,telefone,razao_social,cidade,estado,endereco,documento,tipo_documento,DATE_FORMAT(data_nascimento, '%Y-%m-%d'), imagem_perfil,descricao,apresentacao FROM prestador")
+    cursor.execute("SELECT id_prestador,nome,email,cep,senha,telefone,razao_social,cidade,estado,endereco,documento,tipo_documento,DATE_FORMAT(data_nascimento, '%Y-%m-%d'), imagem_perfil,descricao,apresentacao,foto_perfil FROM prestador")
     result = cursor.fetchall()
     print("Users retrieved!")
     for x in result:
-        p =  Prestador(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10],x[11],x[12],x[13],x[14],x[15])
-        
-        cursor.execute('SELECT id_tipo_prestador FROM assoc_prestador_tipo_prestador a join tipo_prestador t on a.id_tipo_prestador = t.idtipo_prestador where a.id_prestador = {id_prestador}'.format(id_prestador=p.id_prestador))
+        p =  Prestador(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10],x[11],x[12],x[13],x[14],x[15],x[16])
+        cursor.execute('SELECT id_tipo_prestador, t.descricao, t.icone FROM assoc_prestador_tipo_prestador a join tipo_prestador t on a.id_tipo_prestador = t.idtipo_prestador where a.id_prestador = {id_prestador} limit 1'.format(id_prestador=p.id_prestador))
         result2 = cursor.fetchall()
-        p.tipos_prestador = result2
+        for y in result2:
+            t = TipoPrestador(y[0],y[1],y[2])
+            p.tipos_prestador = t.__dict__
         prestadores_list.append(p)
     return prestadores_list
+
+def get_prestador_by_id(id):
+    mydb = get_connection()
+    print("Connected to db!")
+    cursor = mydb.cursor()
+    cursor.execute("SELECT id_prestador,nome,email,cep,senha,telefone,razao_social,cidade,estado,endereco,documento,tipo_documento,DATE_FORMAT(data_nascimento, '%Y-%m-%d'), imagem_perfil,descricao,apresentacao,foto_perfil FROM prestador WHERE id_prestador ={id_prestador} ".format(id_prestador=id) )
+    x = cursor.fetchone()
+    p = Prestador(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10],x[11],x[12],x[13],x[14],x[15],x[16])
+    cursor.execute('SELECT id_tipo_prestador, t.descricao, t.icone FROM assoc_prestador_tipo_prestador a join tipo_prestador t on a.id_tipo_prestador = t.idtipo_prestador where a.id_prestador = {id_prestador} limit 1'.format(id_prestador=p.id_prestador))
+    result2 = cursor.fetchall()
+    for y in result2:
+        t = TipoPrestador(y[0],y[1],y[2])
+        p.tipos_prestador = (t.__dict__)
+    return p
 

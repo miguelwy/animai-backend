@@ -72,7 +72,7 @@ def get_cliente():
 def delete_cliente():
     return "<p>Delete User!</p>"
 
-@app.route("/prestadores/get")
+@app.route("/prestadores/get", methods=['GET','POST'])
 def get_prestadores():
     prestadores = None
     try:
@@ -81,7 +81,15 @@ def get_prestadores():
         print("Error {error}".format(error= error))
     return str(json.dumps([ob.__dict__ for ob in prestadores]))
 
-
+@app.route("/prestadores/getid", methods=['POST'])
+def get_prestadores_by_id():
+    prestador = None
+    data = request.get_json()
+    try:
+        prestador = db.get_prestador_by_id(data['id_prestador'])
+    except(Exception) as error:
+        print("Error {error}".format(error= error))
+    return str(json.dumps(prestador.__dict__))
 
 @app.route("/prestadores/delete")
 def delete_prestadores():
