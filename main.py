@@ -55,7 +55,20 @@ def insert_prestadores():
         print("Um erro ocorreu ao inserir o prestador: {error}".format(error=error))
         return "Erro ao inserir prestador"
     return "Prestador inserido"
-    
+
+@app.route("/prestadores/favoritar", methods=['POST'])
+@cross_origin()
+def insert_favorito():
+    print("favoritado")
+    data = request.get_json()
+    try:
+        if data['favorito'] is None:
+            db.insert_favourite(data['id_prestador'],data['id_cliente'])
+        else:
+            db.delete_favourite(data['id_prestador'],data['id_cliente'])
+    except(Exception) as error:
+        print("Error {error}".format(error= error))
+    return "Prestador Favorito Inserido"
 
 @app.route("/clientes/get")
 def get_cliente():
@@ -66,8 +79,6 @@ def get_cliente():
         print("Error {error}".format(error= error))
     return json.dumps(clientes)
 
-
-
 @app.route("/clientes/delete")
 def delete_cliente():
     return "<p>Delete User!</p>"
@@ -75,8 +86,9 @@ def delete_cliente():
 @app.route("/prestadores/get", methods=['GET','POST'])
 def get_prestadores():
     prestadores = None
+    data = request.get_json()
     try:
-        prestadores = db.get_prestadores()
+        prestadores = db.get_prestadores(data['id_cliente'])
     except(Exception) as error:
         print("Error {error}".format(error= error))
     return str(json.dumps([ob.__dict__ for ob in prestadores]))
@@ -86,7 +98,7 @@ def get_prestadores_by_id():
     prestador = None
     data = request.get_json()
     try:
-        prestador = db.get_prestador_by_id(data['id_prestador'])
+        prestador = db.get_prestador_by_id(data['id_prestador'],data['id_cliente'])
     except(Exception) as error:
         print("Error {error}".format(error= error))
     return str(json.dumps(prestador.__dict__))
@@ -94,6 +106,9 @@ def get_prestadores_by_id():
 @app.route("/prestadores/delete")
 def delete_prestadores():
     return "<p>Delete Service Provider!</p>"
+
+
+    
 
 
 

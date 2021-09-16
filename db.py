@@ -71,16 +71,16 @@ def insert_prestador(prestador:Prestador):
     except(Exception) as error:
         raise Exception("Um erro ocorreu ao inserir o prestador: {error}".format(error=error))
 
-def get_prestadores():
+def get_prestadores(id_cliente):
     prestadores_list = []
     mydb = get_connection()
     print("Connected to db!")
     cursor = mydb.cursor()
-    cursor.execute("SELECT id_prestador,nome,email,cep,senha,telefone,razao_social,cidade,estado,endereco,documento,tipo_documento,DATE_FORMAT(data_nascimento, '%Y-%m-%d'), imagem_perfil,descricao,apresentacao,foto_perfil FROM prestador")
+    cursor.execute("SELECT p.id_prestador,nome,email,cep,senha,telefone,razao_social,cidade,estado,endereco,documento,tipo_documento,DATE_FORMAT(data_nascimento, '%Y-%m-%d'), imagem_perfil,descricao,apresentacao,foto_perfil, a.favourite FROM prestador p left join assoc_cliente_prestador_favorito a on p.id_prestador = a.id_prestador and a.id_cliente = {cliente}".format(cliente=id_cliente))
     result = cursor.fetchall()
     print("Users retrieved!")
     for x in result:
-        p =  Prestador(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10],x[11],x[12],x[13],x[14],x[15],x[16])
+        p =  Prestador(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10],x[11],x[12],x[13],x[14],x[15],x[16], x[17])
         cursor.execute('SELECT id_tipo_prestador, t.descricao, t.icone FROM assoc_prestador_tipo_prestador a join tipo_prestador t on a.id_tipo_prestador = t.idtipo_prestador where a.id_prestador = {id_prestador} limit 1'.format(id_prestador=p.id_prestador))
         result2 = cursor.fetchall()
         for y in result2:
@@ -89,17 +89,34 @@ def get_prestadores():
         prestadores_list.append(p)
     return prestadores_list
 
-def get_prestador_by_id(id):
+def get_prestador_by_id(id,id_cliente):
     mydb = get_connection()
     print("Connected to db!")
     cursor = mydb.cursor()
-    cursor.execute("SELECT id_prestador,nome,email,cep,senha,telefone,razao_social,cidade,estado,endereco,documento,tipo_documento,DATE_FORMAT(data_nascimento, '%Y-%m-%d'), imagem_perfil,descricao,apresentacao,foto_perfil FROM prestador WHERE id_prestador ={id_prestador} ".format(id_prestador=id) )
+    cursor.execute("SELECT p.id_prestador,nome,email,cep,senha,telefone,razao_social,cidade,estado,endereco,documento,tipo_documento,DATE_FORMAT(data_nascimento, '%Y-%m-%d'), imagem_perfil,descricao,apresentacao,foto_perfil, a.favourite FROM prestador p left join assoc_cliente_prestador_favorito a on p.id_prestador = a.id_prestador and a.id_cliente = {cliente} WHERE p.id_prestador ={id_prestador} ".format(id_prestador=id,cliente=id_cliente) )
     x = cursor.fetchone()
-    p = Prestador(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10],x[11],x[12],x[13],x[14],x[15],x[16])
+    p = Prestador(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10],x[11],x[12],x[13],x[14],x[15],x[16],x[17])
     cursor.execute('SELECT id_tipo_prestador, t.descricao, t.icone FROM assoc_prestador_tipo_prestador a join tipo_prestador t on a.id_tipo_prestador = t.idtipo_prestador where a.id_prestador = {id_prestador} limit 1'.format(id_prestador=p.id_prestador))
     result2 = cursor.fetchall()
     for y in result2:
         t = TipoPrestador(y[0],y[1],y[2])
         p.tipos_prestador = (t.__dict__)
     return p
+
+def insert_favourite(id_prestador,id_cliente):
+    mydb = get_connection()
+    print("Connected to db!")
+    cursor = mydb.cursor()
+    cursor.execute('INSERT INTO assoc_cliente_prestador_favorito VALUES ({id_cliente},{id_prestador} ,1)'.format(id_prestador=id_prestador,id_cliente=id_cliente))
+    mydb.commit()
+
+
+def delete_favourite(id_prestador,id_cliente):
+    mydb = get_connection()
+    print("Connected to db!")
+    cursor = mydb.cursor()
+    cursor.execute('DELETE FROM assoc_cliente_prestador_favorito WHERE id_cliente = {id_cliente} AND id_prestador = {id_prestador}'.format(id_prestador=id_prestador,id_cliente=id_cliente))
+    mydb.commit()
+    
+
 

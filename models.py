@@ -13,7 +13,7 @@ class Cliente:
         self.telefone = telefone
 
 class Prestador:
-    def __init__(self, id_prestador,nome,email,cep,senha,documento, tipo_documento,telefone,razao_social,cidade,estado,endereco, data_nascimento, imagem_perfil,descricao,apresentacao,foto_perfil):
+    def __init__(self, id_prestador,nome,email,cep,senha,documento, tipo_documento,telefone,razao_social,cidade,estado,endereco, data_nascimento, imagem_perfil,descricao,apresentacao,foto_perfil, favorito):
         self.id_prestador = id_prestador
         self.nome = nome
         self.email = email
@@ -35,6 +35,7 @@ class Prestador:
         self.apresentacao = apresentacao
         self.tipos_prestador = []
         self.foto_perfil = foto_perfil
+        self.favorito = favorito
 
 class TipoPrestador:
     def __init__(self,idtipo_prestador,descricao,icone) -> None:
