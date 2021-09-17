@@ -1,7 +1,7 @@
 from flask import Flask, request
 import db
 import json
-from models import Cliente, Prestador
+from models import Cliente, Prestador, Proposta
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
@@ -13,19 +13,26 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 def login():
     try:
         data = request.get_json()
-        result = db.login(data['email'],data['password'])
+        result = db.login(data['email'],data['password'],data['userType'])
         r = None
+        t = None
+        if data['userType'] == 'cliente':
+            t = 1
+        else:
+            t = 2
         if result is None:
             r = {
                 'client':None,
                 'error':True,
-                'message':'Usuário ou senha incorretos!'
+                'message':'Usuário ou senha incorretos!',
+                'type':t
             }
         else:
             r = {
                 'client':json.dumps(result.__dict__),
                 'error':False,
-                'message':'Login realizado com sucesso!'
+                'message':'Login realizado com sucesso!',
+                'type':t
             }
         return r
     except(Exception) as error:
@@ -44,6 +51,19 @@ def insert_cliente():
         return "Erro ao inserir"
     return "Cliente inserido"
 
+@app.route("/clientes/update", methods=['POST'])
+@cross_origin()
+def update_cliente():
+    try:
+        data = request.get_json()
+        c = data['cliente']
+        cliente = Cliente(c['id'], c['nome'],c['email'],c['cep'],c['senha'],c['cpf'],c['cidade'],c['estado'],c['endereco'],c['data_nascimento'],c['telefone'],c['numero'],c['complemento'])
+        db.update_cliente(cliente)
+    except(Exception) as error:
+        print("Um erro ocorreu ao atualizar o cliente: {error}".format(error=error))
+        return "Erro ao atualizar"
+    return "Cliente atualizado"
+
 @app.route("/prestadores/insert", methods=['POST'])
 @cross_origin()
 def insert_prestadores():
@@ -55,6 +75,61 @@ def insert_prestadores():
         print("Um erro ocorreu ao inserir o prestador: {error}".format(error=error))
         return "Erro ao inserir prestador"
     return "Prestador inserido"
+
+@app.route('/proposta/get', methods=['POST'])
+@cross_origin()
+def get_propostas():
+    try:
+        data = request.get_json()
+        propostas = None
+        propostas = db.get_propostas(data['id_prestador'])
+    except(Exception) as error:
+        print("Um erro ocorreu ao consultar as propostas: {error}".format(error=error))
+        return "Erro ao consultar propostas"
+    return str(json.dumps([ob.__dict__ for ob in propostas]))
+
+@app.route('/proposta/getbyid', methods=['POST'])
+@cross_origin()
+def get_propostas_by_id():
+    try:
+        data = request.get_json()
+        proposta = db.get_propostas_by_id(data['id_proposta'])
+    except(Exception) as error:
+        print("Um erro ocorreu ao consultar as propostas: {error}".format(error=error))
+        return "Erro ao consultar propostas"
+    return str(json.dumps(proposta.__dict__))
+
+@app.route('/proposta/getbyclient', methods=['POST'])
+@cross_origin()
+def get_propostas_by_client():
+    try:
+        data = request.get_json()
+        propostas = db.get_propostas_by_client(data['id_cliente'])
+    except(Exception) as error:
+        print("Um erro ocorreu ao consultar as propostas: {error}".format(error=error))
+        return "Erro ao consultar propostas"
+    return str(json.dumps([ob.__dict__ for ob in propostas]))
+
+@app.route("/proposta/insert", methods=['POST'])
+def insert_proposta():
+    try:
+        data = request.get_json()
+        p = data['proposta']
+        proposta = Proposta(None,p['data_proposta'],p['cep'],p['cidade'],p['estado'],p['endereco'],p['horario_inicio'],p['horario_fim'],p['observacoes'],p['data_criacao'],p['valor'],p['id_cliente'],p['id_prestador'],p['numero'],p['complemento'],1)
+        db.insert_proposta(proposta)
+    except(Exception) as error:
+        print("Um erro ocorreu ao inserir o prestador: {error}".format(error=error))
+        return "Erro ao inserir proposta"
+    return "Proposta inserida"
+
+@app.route("/proposta/status", methods=['POST'])
+def atualizar_proposta():
+    try:
+        data = request.get_json()
+        db.approve_proposta(data['id_proposta'],data['status'])
+    except(Exception) as error:
+        return "Erro ao atualizar proposta"
+    return "Proposta atualizada"
 
 @app.route("/prestadores/favoritar", methods=['POST'])
 @cross_origin()
@@ -89,6 +164,17 @@ def get_prestadores():
     data = request.get_json()
     try:
         prestadores = db.get_prestadores(data['id_cliente'])
+    except(Exception) as error:
+        print("Error {error}".format(error= error))
+    return str(json.dumps([ob.__dict__ for ob in prestadores]))
+
+@app.route("/prestadores/favoritos/get", methods=['GET','POST'])
+def get_prestadores_favoritos():
+    prestadores = None
+    data = request.get_json()
+    try:
+        prestadores = db.get_prestadores_favoritos(data['id_cliente'])
+        print(prestadores[0].estado)
     except(Exception) as error:
         print("Error {error}".format(error= error))
     return str(json.dumps([ob.__dict__ for ob in prestadores]))
