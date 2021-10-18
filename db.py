@@ -119,7 +119,12 @@ def get_prestadores(id_cliente):
         for y in result2:
             t = TipoPrestador(y[0],y[1],y[2])
             p.tipos_prestador = t.__dict__
-        prestadores_list.append(p)
+        cursor.execute("SELECT AVG(rating) FROM rating where idprestador = {idprestador}".format(idprestador=p.id_prestador))
+        result3 = cursor.fetchone()
+        p.rating = result3[0]
+        print(len(y))
+        if len(result2) > 0:
+            prestadores_list.append(p)
     return prestadores_list
 
 def get_prestadores_favoritos(id_cliente):
@@ -152,6 +157,10 @@ def get_prestador_by_id(id,id_cliente):
     for y in result2:
         t = TipoPrestador(y[0],y[1],y[2])
         p.tipos_prestador = (t.__dict__)
+    cursor.execute("SELECT AVG(rating),COUNT(*) FROM rating where idprestador = {idprestador}".format(idprestador=p.id_prestador))
+    result3 = cursor.fetchone()
+    p.rating = result3[0]
+    p.rating_count = result3[1]
     return p
 
 def get_propostas(id_prestador):
@@ -159,7 +168,7 @@ def get_propostas(id_prestador):
     propostas = []
     print("Connected to db!")
     cursor = mydb.cursor()
-    cursor.execute("SELECT id_proposta,DATE_FORMAT(data_proposta, '%Y-%m-%d'),cep,cidade,estado,endereco,'18:30','18:30',observacoes,DATE_FORMAT(data_criacao, '%Y-%m-%d'),valor,id_cliente,id_prestador,numero,complemento,status FROM proposta WHERE id_prestador = {id_prestador} ".format(id_prestador=id_prestador) )
+    cursor.execute("SELECT id_proposta,DATE_FORMAT(data_proposta, '%Y-%m-%d'),cep,cidade,estado,endereco,'18:30','18:30',observacoes,DATE_FORMAT(data_criacao, '%Y-%m-%d'),valor,id_cliente,id_prestador,numero,complemento,status FROM proposta WHERE id_prestador = {id_prestador} and status = 1".format(id_prestador=id_prestador) )
     result = cursor.fetchall()
     for x in result:
         p = Proposta(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10],x[11],x[12],x[13],x[14],x[15])

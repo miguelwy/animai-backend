@@ -38,6 +38,8 @@ class Prestador:
         self.tipos_prestador = []
         self.foto_perfil = foto_perfil
         self.favorito = favorito
+        self.rating = 0
+        self.rating_count = 0
 
 class TipoPrestador:
     def __init__(self,idtipo_prestador,descricao,icone) -> None:
