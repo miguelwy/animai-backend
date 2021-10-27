@@ -1,7 +1,7 @@
 from flask import Flask, request
 import db
 import json
-from models import Cliente, Prestador, Proposta
+from models import Cliente, PaymentMethod, Prestador, Proposta
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
@@ -63,6 +63,36 @@ def update_cliente():
         print("Um erro ocorreu ao atualizar o cliente: {error}".format(error=error))
         return "Erro ao atualizar"
     return "Cliente atualizado"
+
+@app.route("/prestadores/update", methods=['POST'])
+@cross_origin()
+def update_prestador():
+    try:
+        data = request.get_json()
+        c = data['prestador']
+        prestador = Prestador(c['id_prestador'], c['nome'],c['email'],c['cep'],c['senha'],c['documento'],None,c['telefone'],None,c['cidade'],c['estado'],c['endereco'],c['data_nascimento'],None,c['descricao'],c['apresentacao'],"",None)
+        db.update_prestador(prestador)
+    except(Exception) as error:
+        print("Um erro ocorreu ao atualizar o prestador: {error}".format(error=error))
+        return "Erro ao atualizar"
+    return "Prestador atualizado"
+
+
+@app.route("/prestadores/update-service", methods=['POST'])
+@cross_origin()
+def update_prestador_servico():
+    try:
+        data = request.get_json()
+        id_prestador= data['id_prestador']
+        descricao = data['descricao']
+        apresentacao = data['apresentacao']
+        valor = data['valor']
+        type = data['type']
+        db.update_prestador_servico(id_prestador,descricao,apresentacao,valor, type)
+    except(Exception) as error:
+        print("Um erro ocorreu ao atualizar o prestador: {error}".format(error=error))
+        return "Erro ao atualizar"
+    return "Prestador atualizado"
 
 @app.route("/prestadores/insert", methods=['POST'])
 @cross_origin()
@@ -188,6 +218,27 @@ def get_prestadores_by_id():
     except(Exception) as error:
         print("Error {error}".format(error= error))
     return str(json.dumps(prestador.__dict__))
+
+@app.route("/payment-methods/insert", methods=['POST'])
+@cross_origin()
+def add_payment_method():
+    data = request.get_json()
+    paymentMethod = PaymentMethod(data['idpayment_method'],data['id_client'],data['card_number'],data['card_flag'],data['safety_code'],data['owner_cpf'],data['due_date'],data['owner_name'])
+    try:
+        db.insert_payment_method(paymentMethod)
+    except(Exception) as error:
+        print("Error {error}".format(error= error))
+    return "Metodo inserido com sucesso!"
+
+@app.route("/payment-methods/get", methods=['POST'])
+@cross_origin()
+def get_payment_methods():
+    data = request.get_json()
+    try:
+        payments = db.get_payment_methods_by_client(data['id_client'])
+    except(Exception) as error:
+        print("Error {error}".format(error= error))
+    return str(json.dumps([ob.__dict__ for ob in payments]))
 
 @app.route("/prestadores/delete")
 def delete_prestadores():

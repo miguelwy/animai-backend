@@ -15,7 +15,7 @@ class Cliente:
         self.complemento = complemento
 
 class Prestador:
-    def __init__(self, id_prestador,nome,email,cep,senha,documento, tipo_documento,telefone,razao_social,cidade,estado,endereco, data_nascimento, imagem_perfil,descricao,apresentacao,foto_perfil, favorito):
+    def __init__(self, id_prestador,nome,email,cep,senha,documento, tipo_documento,telefone,razao_social,cidade,estado,endereco, data_nascimento, imagem_perfil,descricao,apresentacao,foto_perfil, favorito,valor):
         self.id_prestador = id_prestador
         self.nome = nome
         self.email = email
@@ -40,6 +40,7 @@ class Prestador:
         self.favorito = favorito
         self.rating = 0
         self.rating_count = 0
+        self.valor= valor
 
 class TipoPrestador:
     def __init__(self,idtipo_prestador,descricao,icone) -> None:
@@ -65,3 +66,14 @@ class Proposta:
         self.numero = numero
         self.complemento = complemento
         self.status = status
+
+class PaymentMethod:
+    def __init__(self,idpayment_method,id_client,card_number,card_flag,safety_code,owner_cpf,due_date, owner_name):
+        self.idpayment_method = idpayment_method
+        self.id_client = id_client
+        self.card_number = card_number
+        self.card_flag = card_flag
+        self.safety_code = safety_code
+        self.owner_cpf  = owner_cpf
+        self.due_date =due_date
+        self.owner_name = owner_name
